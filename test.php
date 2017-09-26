@@ -10,7 +10,6 @@
 
 <body>
 <H1>Veille juridique</H1>
-<?php // <img src="http://www.tfvb.fr/images/Lala.png"> ?>
 <H2>Jurisprudence</H2>
 </body>
 

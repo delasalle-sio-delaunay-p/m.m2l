@@ -1,5 +1,5 @@
 <?php
-
+// Modification 4 du 26/09/2017 à 16h53
 ?>
 <html>
 <header>
@@ -10,7 +10,7 @@
 <body>
 <H1>Veille juridique</H1>
 <H2>COUCOU</H2>
-<?php // <img src="http://www.tfvb.fr/images/Lala.png"> ?>
+<p></p>
 
 </body>
 

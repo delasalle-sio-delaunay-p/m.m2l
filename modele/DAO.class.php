@@ -306,6 +306,25 @@ class DAO
 			return "1";
 	}
 	
+	// cette fonction permet d'annuler une réservation avec l'identifiant de la réservation choisie
+	// paramètre(s) : $idReservation ==> l'identifiant d'une réservation
+	// valeur de retour : un booléen VRAI si la confirmation a bien été annulée, FAUX sinon
+	// modifié par Pierre le 03/10/2017
+	public function annulerReservation($idReservation)
+	{	// préparation de la requete de suppression
+	    
+	    $txt_req = "DELETE from mrbs_entry where id = :idReservation";
+	    $req = $this->cnx->prepare($txt_req);
+	    // liaison de la requête et de ses paramètres
+	    $req->bindValue("idReservation", $idReservation, PDO::PARAM_STR);
+	    // exécution de la requete
+	    $ok = $req->execute();
+	    
+	    // fourniture de la réponse
+	    return $ok;
+    
+	}
+	
 } // fin de la classe DAO
 
 // ATTENTION : on ne met pas de balise de fin de script pour ne pas prendre le risque

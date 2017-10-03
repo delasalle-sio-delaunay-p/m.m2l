@@ -25,14 +25,14 @@ $dao = new DAO();
 // pour ce test, utiliser une réservation existante
 // modifié par Jim le 28/9/2015
 echo "<h3>Test de annulerReservation : </h3>";
-$laReservation = $dao->getReservation("1");
+$laReservation = $dao->getReservation("3");
 if ($laReservation) {
-	$dao->annulerReservation("1");
-	$laReservation = $dao->getReservation("1");
+	$dao->annulerReservation("3");
+	$laReservation = $dao->getReservation("3");
 	if ($laReservation)
-		echo "La réservation 1 n'a pas été supprimée !</p>";
+		echo "La réservation 3 n'a pas été supprimée !</p>";
 	else
-		echo "La réservation 1 a bien été supprimée !</p>";
+		echo "La réservation 3 a bien été supprimée !</p>";
 }
 else
 	echo "<p>La réservation 1 n'existe pas !</p>";
@@ -44,7 +44,7 @@ else
 // pour ce test, choisir un utilisateur avec des réservations et un autre sans réservation
 // modifié par Jim le 28/9/2015
 echo "<h3>Test de aPasseDesReservations : </h3>";
-$ok = $dao->aPasseDesReservations("zenelsy");
+$ok = $dao->aPasseDesReservations("admin");
 if ($ok)
 	echo "<p>zenelsy a bien passé des réservations !<br>";
 else
@@ -112,7 +112,7 @@ else
 // test de la méthode estLeCreateur ---------------------------------------------------------------
 // modifié par Jim le 25/9/2015
 echo "<h3>Test de estLeCreateur : </h3>";
-if ($dao->estLeCreateur("admin", "11")) $estLeCreateur = "oui"; else $estLeCreateur = "non";
+if ($dao->estLeCreateur("admin", "4")) $estLeCreateur = "oui"; else $estLeCreateur = "non";
 echo "<p>'admin' a créé la réservation 11 : <b>" . $estLeCreateur . "</b><br>";
 if ($dao->estLeCreateur("zenelsy", "11")) $estLeCreateur = "oui"; else $estLeCreateur = "non";
 echo "'zenelsy' a créé la réservation 11 : <b>" . $estLeCreateur . "</b></p>";
@@ -123,8 +123,8 @@ echo "'zenelsy' a créé la réservation 11 : <b>" . $estLeCreateur . "</b></p>"
 // test de la méthode existeReservation -----------------------------------------------------------
 // modifié par Jim le 25/9/2015
 echo "<h3>Test de existeReservation : </h3>";
-if ($dao->existeReservation("11")) $existe = "oui"; else $existe = "non";
-echo "<p>Existence de la réservation 11 : <b>" . $existe . "</b><br>";
+if ($dao->existeReservation("4")) $existe = "oui"; else $existe = "non";
+echo "<p>Existence de la réservation 4 : <b>" . $existe . "</b><br>";
 if ($dao->existeReservation("12")) $existe = "oui"; else $existe = "non";
 echo "Existence de la réservation 12 : <b>" . $existe . "</b></p>";
 */
@@ -200,16 +200,16 @@ echo "NiveauUtilisateur de ('guesdonm', 'passe') : <b>" . $niveauUtilisateur . "
 // test de la méthode getReservation --------------------------------------------------------------
 // modifié par Jim le 25/9/2015
 echo "<h3>Test de getReservation : </h3>";
-$laReservation = $dao->getReservation("11");
+$laReservation = $dao->getReservation("3");
 if ($laReservation) 
-	echo "<p>La réservation 11 existe : <br>" . $laReservation->toString() . "</p>";
+	echo "<p>La réservation 3 existe : <br>" . $laReservation->toString() . "</p>";
 else
-	echo "<p>La réservation 11 n'existe pas !</p>";	
-$laReservation = $dao->getReservation("12");
+	echo "<p>La réservation 3 n'existe pas !</p>";	
+$laReservation = $dao->getReservation("4");
 if ($laReservation) 
-	echo "<p>La réservation 12 existe : <br>" . $laReservation->toString() . "</p>";
+	echo "<p>La réservation 4 existe : <br>" . $laReservation->toString() . "</p>";
 else
-	echo "<p>La réservation 12 n'existe pas !</p>";	
+	echo "<p>La réservation 4 n'existe pas !</p>";	
 */
 
 

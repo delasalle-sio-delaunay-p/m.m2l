@@ -11,15 +11,19 @@ class Salle {
     // ---------------------------------- Membres privés de la classe ---------------------------------------
     // ------------------------------------------------------------------------------------------------------
     
+
+        
     private $id;        // identifiant de la salle
     private $room_name; // nom de la salle
     private $capacity;  // capacité de la salle
     private $area_name; // nom de la zone
+
     
     
     // ------------------------------------------------------------------------------------------------------
     // ----------------------------------------- Constructeur -----------------------------------------------
     // ------------------------------------------------------------------------------------------------------
+
     
     public function Salle($unId, $unRoomName, $uneCapacity, $unAreaName) {
         $this->id = $unId;
@@ -27,27 +31,28 @@ class Salle {
         $this->capacity = $uneCapacity;
         $this->area_name = $unAreaName;
     }
+
     
     
     // ------------------------------------------------------------------------------------------------------
     // ---------------------------------------- Getters et Setters ------------------------------------------
     // ------------------------------------------------------------------------------------------------------
-    
     public function getId()	{return $this->id;}
     public function setId($unId) {$this->id = $unId;}
     
-    public function getRoom_name()	{return $this->room_name;}
+    public function getRoom_name() {return $this->room_name;}
     public function setRoom_name($unRoomName) {$this->room_name = $unRoomName;}
     
     public function getCapacity()	{return $this->capacity;}
-    public function setCapacity($uneCapacity) {$this->capacity = $uneCapacity;}
-    
+    public function setCapacity($unCapacity) {$this->capacity = $unCapacity;}
+
     public function getAreaName()	{return $this->area_name;}
     public function setAreaName($unAreaName) {$this->area_name = $unAreaName;}
     
     // ------------------------------------------------------------------------------------------------------
     // ---------------------------------------- Méthodes d'instances ----------------------------------------
     // ------------------------------------------------------------------------------------------------------
+
 
     public function toString() {
         $msg = "Salle : <br>";
@@ -57,6 +62,7 @@ class Salle {
         $msg .= "area_name : " . $this->area_name . "<br>";
         return $msg;
     }
+
 
 } // fin de la classe Salle
 

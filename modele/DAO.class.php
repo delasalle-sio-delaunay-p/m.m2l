@@ -83,7 +83,6 @@ class DAO
 	public function creerLesDigicodesManquants()
 	{	// préparation de la requete de recherche des réservations sans digicode
 		$txt_req1 = "Select id from mrbs_entry where id not in (select id from mrbs_entry_digicode)";
-		$req1 = $this->cnx->prepare($txt_req1);
 		// extraction des données
 		$req1->execute();
 		// extrait une ligne du résultat :
@@ -305,6 +304,47 @@ class DAO
 		else
 			return "1";
 	}
+	// aPasseDesReservations : recherche si l'utilisateur ($name) a passé des réservations à venir
+	// valeur de retour : un booléen "true" si l'utilisateur a passé des réservations à venir, "false" sinon
+    // créer par Mickaël Coubrun le 03/10/2017
+	public function aPasseDesReservations($nom)
+	{  // préparation de la requête
+	    $txt_req = "SELECT count(*) FROM mrbs_entry WHERE create_by = :nom";
+	    $req = $this->cnx->prepare($txt_req);
+	    // liaison de la requête et de ses paramètres
+	    $req->bindValue("nom", $nom, PDO::PARAM_STR);
+	    // exécution de la requête
+	    $req->execute();
+	    $nbReponses = $req->fetchColumn(0);
+	    // libère les ressources du jeu de données
+	    $req->closeCursor();
+	    // fourniture de la réponse
+	    if ($nbReponses == 0)
+	        return false;
+	    else 
+	        return true;
+	}
+	// donne si la réservation proposée est faite par l'utilisateur donné
+	// fait le 03/10/2017
+	public function estLeCreateur($nomUser, $idReservation)
+	{  // préparation de la requête
+	    $txt_req = "SELECT count(*) from mrbs_entry WHERE create_by = :nomUser AND id = :idReservation";
+	    $req = $this->cnx->prepare($txt_req);
+	   // liaison de la requête et de ses paramêtres
+	    $req->bindValue("nomUser", $nomUser, PDO::PARAM_STR);
+	    $req->bindValue("idReservation", $idReservation, PDO::PARAM_STR);
+	   // exécution de la requête
+	   $req->execute();
+	   $nbReponses = $req->fetchColumn(0);
+	   // libère les ressources du jeu de données
+	   $req->closeCursor();
+	   // fourniture de la réponse
+	    if ($nbReponse == 0)
+	        return false;
+	    else 
+	        return true;
+	}
+	
 	
 	// cette fonction permet d'annuler une réservation avec l'identifiant de la réservation choisie
 	// paramètre(s) : $idReservation ==> l'identifiant d'une réservation

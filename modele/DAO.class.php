@@ -488,8 +488,8 @@ class DAO
 	    // fourniture de la réponse
 	    if ($nbReponses == 0)
 	        return false;
-	        else
-	            return true;
+	    else
+	        return true;
 	}
 	
 	

@@ -508,6 +508,24 @@ class DAO
 	    return $ok;
 	}
 	
+	// envoie un mail à user avec son new MDP
+	// retourne true si envoi bon, false si problème d'envoi
+	// Mickaël Coubrun 10/10/2017
+	public function envoyerMdp($nomUser, $nouveauMdp)
+	{	global $ADR_MAIL_EMETTEUR;
+	// si l'adresse n'est pas dans la table mrbs_users :
+	if ( ! $this->existeUtilisateur($nomUser) ) return false;
+	
+	// recherche de l'adresse mail
+	$adrMail = $this->getUtilisateur($nomUser)->getEmail();
+	
+	// envoie un mail à l'utilisateur avec son nouveau mot de passe
+	$sujet = "Modification de votre mot de passe d'accès au service Réservations M2L";
+	$message = "Votre mot de passe d'accès au service Réservations M2L a été modifié.\n\n";
+	$message .= "Votre nouveau mot de passe est : " . $nouveauMdp;
+	$ok = Outils::envoyerMail ($adrMail, $sujet, $message, $ADR_MAIL_EMETTEUR);
+	return $ok;
+	}
 	
 } // fin de la classe DAO
 

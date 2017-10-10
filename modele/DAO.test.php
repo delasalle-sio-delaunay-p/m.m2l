@@ -99,8 +99,8 @@ else
 // test de la méthode envoyerMdp ------------------------------------------------------------------
 // modifié par Jim le 28/9/2015
 echo "<h3>Test de envoyerMdp : </h3>";
-$dao->modifierMdpUser("jim", "passe");
-$ok = $dao->envoyerMdp("jim", "passe");
+$dao->modifierMdpUser("admin", "passe");
+$ok = $dao->envoyerMdp("admin", "passe");
 if ($ok)
 	echo "<p>Mail bien envoyé !</p>";
 else

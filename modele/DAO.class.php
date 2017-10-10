@@ -548,7 +548,7 @@ class DAO
 	        return 1;
 	    }
 	    else { return 0; }
-	    
+	   
 	}
 	
 } // fin de la classe DAO

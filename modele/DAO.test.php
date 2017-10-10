@@ -57,21 +57,21 @@ else
 
 
 
-
+/*
 // test de la méthode confirmerReservation --------------------------------------------------------
 // pour ce test, utiliser une réservation dont le champ status est mis auparavant à 4 (état provisoire)
 // modifié par Jim le 28/9/2015
 echo "<h3>Test de confirmerReservation : </h3>";
-$laReservation = $dao->getReservation("1");
+$laReservation = $dao->getReservation("4");
 if ($laReservation) {
-	echo "<p>Etat de la réservation 1 avant confirmation : <b>" . $laReservation->getStatus() . "</b><br>";
-	$dao->confirmerReservation("1");
-	$laReservation = $dao->getReservation("1");
-	echo "Etat de la réservation 1 après confirmation : <b>" . $laReservation->getStatus() . "</b></p>";
+	echo "<p>Etat de la réservation 4 avant confirmation : <b>" . $laReservation->getStatus() . "</b><br>";
+	$dao->confirmerReservation("4");
+	$laReservation = $dao->getReservation("4");
+	echo "Etat de la réservation 4 après confirmation : <b>" . $laReservation->getStatus() . "</b></p>";
 }
 else
 	echo "<p>La réservation 1 n'existe pas !</p>";
-
+*/
 
 
 // test de la méthode creerLesDigicodesManquants --------------------------------------------------

@@ -448,7 +448,7 @@ class DAO
 	
 	}
 	
-	/*
+	
 	// cette fonction permet de modifier le Mot de passe d'un utilisateur
 	// paramètre(s) : $nom ==> le nom de l'utilisateur, $nouveauMdp ==> le nouveau mot de passe
 	// valeur de retour : un booléen "true" si la modification a bien eu lieu, "false" sinon
@@ -468,7 +468,7 @@ class DAO
 	        $req->closeCursor();
 	          	    
 	}
-	*/
+	
 	
 	// donne si la réservation proposée est faite par l'utilisateur donné
 	// fait le 03/10/2017 par Mickaël

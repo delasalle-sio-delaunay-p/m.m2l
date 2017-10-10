@@ -533,6 +533,23 @@ class DAO
 	}
 	
 	
+	//test si il existe une réservation provisoire
+	//fournit la valeur 0 si la réservation n'existe pas, 1 si la réservation existe
+	//modifié par Leilla le 03/10/2017
+	
+	public function confirmerReservation($idReservation)
+	{
+	    //préparation de la requete de recherche du statut de la réservation
+	    $txt_req = "UPDATE mrbs_entry SET Status ='0' WHERE id = :idReservation";
+	    $req = $this->cnx->prepare($txt_req);
+	    // liaison de la requête et de ses paramètres
+	    $req->bindValue("idReservation",$idReservation, PDO::PARAM_INT);
+	    // exécution de la requete
+	    $ok = $req->execute();
+	    return $ok;
+	}
+	
+	
 } // fin de la classe DAO
 
 // ATTENTION : on ne met pas de balise de fin de script pour ne pas prendre le risque

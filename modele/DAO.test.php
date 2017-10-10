@@ -57,7 +57,7 @@ else
 
 
 
-/*
+
 // test de la méthode confirmerReservation --------------------------------------------------------
 // pour ce test, utiliser une réservation dont le champ status est mis auparavant à 4 (état provisoire)
 // modifié par Jim le 28/9/2015
@@ -71,7 +71,7 @@ if ($laReservation) {
 }
 else
 	echo "<p>La réservation 1 n'existe pas !</p>";
-*/
+
 
 
 // test de la méthode creerLesDigicodesManquants --------------------------------------------------

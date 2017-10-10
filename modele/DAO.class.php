@@ -527,6 +527,30 @@ class DAO
 	return $ok;
 	}
 	
+	// cette méthode permet de tester le digicode d'une salle/d'un bâtiment
+	// paramètre(s) : $digicodeSaisi ==> le digicode saisi par l'utilisateur
+	// valeur de retour : 1 si le digicode correspond à une réservation actuelle, 0 sinon
+	// modifié par Pierre le 10/10/2017
+	public function testerDigicodeBatiment($digicodeSaisi)
+	{
+	    // préparation de la requête
+	    $txt_req = "SELECT COUNT(*) FROM mrbs_entry_digicode WHERE digicode = :digicodeSaisi";
+	    $req = $this->cnx->prepare($txt_req);
+	    // liaison de la requête et de ses paramètres
+	    $req->bindValue("digicodeSaisi", $digicodeSaisi, PDO::PARAM_STR);
+	    // exécution de la requête
+	    $req->execute();
+	    $nbReponses = $req->fetchColumn(0);
+	    // libère les ressources du jeu de données
+	    $req->closeCursor();
+	    
+	    if($nbReponses == 1) {
+	        return 1;
+	    }
+	    else { return 0; }
+	    
+	}
+	
 } // fin de la classe DAO
 
 // ATTENTION : on ne met pas de balise de fin de script pour ne pas prendre le risque

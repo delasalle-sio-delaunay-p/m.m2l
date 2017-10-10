@@ -83,7 +83,6 @@ class DAO
 	public function creerLesDigicodesManquants()
 	{	// préparation de la requete de recherche des réservations sans digicode
 		$txt_req1 = "Select id from mrbs_entry where id not in (select id from mrbs_entry_digicode)";
-		$req1 = $this->cnx->prepare($txt_req1);
 		// extraction des données
 		$req1->execute();
 		// extrait une ligne du résultat :
@@ -305,6 +304,234 @@ class DAO
 		else
 			return "1";
 	}
+	// aPasseDesReservations : recherche si l'utilisateur ($name) a passé des réservations à venir
+	// valeur de retour : un booléen "true" si l'utilisateur a passé des réservations à venir, "false" sinon
+    // créer par Mickaël Coubrun le 03/10/2017
+	public function aPasseDesReservations($nom)
+	{  // préparation de la requête
+	    $txt_req = "SELECT count(*) FROM mrbs_entry WHERE create_by = :nom";
+	    $req = $this->cnx->prepare($txt_req);
+	    // liaison de la requête et de ses paramètres
+	    $req->bindValue("nom", $nom, PDO::PARAM_STR);
+	    // exécution de la requête
+	    $req->execute();
+	    $nbReponses = $req->fetchColumn(0);
+	    // libère les ressources du jeu de données
+	    $req->closeCursor();
+	    // fourniture de la réponse
+	    if ($nbReponses == 0)
+	        return false;
+	    else 
+	        return true;
+	}
+	// donne si la réservation proposée est faite par l'utilisateur donné
+	// fait le 03/10/2017
+	public function estLeCreateur($nomUser, $idReservation)
+	{  // préparation de la requête
+	    $txt_req = "SELECT count(*) from mrbs_entry WHERE create_by = :nomUser AND id = :idReservation";
+	    $req = $this->cnx->prepare($txt_req);
+	   // liaison de la requête et de ses paramêtres
+	    $req->bindValue("nomUser", $nomUser, PDO::PARAM_STR);
+	    $req->bindValue("idReservation", $idReservation, PDO::PARAM_STR);
+	   // exécution de la requête
+	   $req->execute();
+	   $nbReponses = $req->fetchColumn(0);
+	   // libère les ressources du jeu de données
+	   $req->closeCursor();
+	   // fourniture de la réponse
+	    if ($nbReponse == 0)
+	        return false;
+	    else 
+	        return true;
+	}
+	
+	
+	// cette fonction permet d'annuler une réservation avec l'identifiant de la réservation choisie
+	// paramètre(s) : $idReservation ==> l'identifiant d'une réservation
+	// valeur de retour : un booléen VRAI si la confirmation a bien été annulée, FAUX sinon
+	// modifié par Pierre le 03/10/2017
+	public function annulerReservation($idReservation)
+	{	// préparation de la requete de suppression
+	    
+	    $txt_req = "DELETE from mrbs_entry where id = :idReservation";
+	    $req = $this->cnx->prepare($txt_req);
+	    // liaison de la requête et de ses paramètres
+	    $req->bindValue("idReservation", $idReservation, PDO::PARAM_STR);
+	    // exécution de la requete
+	    $ok = $req->execute();
+	    
+	    // fourniture de la réponse
+	    return $ok;
+    
+	}
+	
+	// cette fonction permet de récupérer une réservation (sous forme d'objet)
+	// paramètre(s) : $idReservation ==> l'identifiant d'une réservation
+	// valeur de retour : un objet réservation si la réservation existe, null sinon
+	// modifié par Pierre le 03/10/2017
+	public function getReservation($idReservation)
+	{	// préparation de la requete
+	
+	    $txt_req = "Select mrbs_entry.id, timestamp, start_time, end_time, room_name, status, digicode";
+	    $txt_req = $txt_req . " from mrbs_entry, mrbs_room, mrbs_entry_digicode";
+	    $txt_req = $txt_req . " where mrbs_entry.id = :idReservation";
+	    $txt_req = $txt_req . " and mrbs_entry.id = mrbs_entry_digicode.id";
+	    $txt_req = $txt_req . " and mrbs_entry.room_id = mrbs_room.id;";
+	    
+	    $req = $this->cnx->prepare($txt_req);
+	    // liaison de la requête et de ses paramètres
+	    $req->bindValue("idReservation", $idReservation, PDO::PARAM_STR);
+	    // extraction des données
+	    $req->execute();
+	    $uneLigne = $req->fetch(PDO::FETCH_OBJ);
+	    
+	    if ($uneLigne) {
+	        
+	        $unId = $uneLigne->id;
+	        $unTimeStamp = utf8_encode($uneLigne->timestamp);
+	        $unStartTime = utf8_encode($uneLigne->start_time);
+	        $unEndTime = utf8_encode($uneLigne->end_time);
+	        $unRoomName = utf8_encode($uneLigne->room_name);
+	        $unStatus = utf8_encode($uneLigne->status);
+	        $unDigicode = utf8_encode($uneLigne->digicode);
+	        
+	        $laReservation = new Reservation($unId, $unTimeStamp, $unStartTime, $unEndTime, $unRoomName, $unStatus, $unDigicode);
+	    }
+	    else
+	    {  
+	        $laReservation = null;
+	    }
+	    
+	    return $laReservation; 
+	}
+    
+	
+	// cette fonction permet de récupérer un utilisateur (sous forme d'objet) à partir de son nom
+	// paramètre(s) : $nomUser ==> le nom d'un utilisateur
+	// valeur de retour : un objet Utilisateur (si le nom existe existe) ou null sinon
+	// modifié par Pierre le 03/10/2017
+	public function getUtilisateur($nomUser)
+	{	// préparation de la requete
+	    $txt_req = "Select *";
+	    $txt_req = $txt_req . " from mrbs_users";
+	    $txt_req = $txt_req . " where mrbs_users.name = :nomUser";
+	    
+	    $req = $this->cnx->prepare($txt_req);
+	    // liaison de la requête et de ses paramètres
+	    $req->bindValue("nomUser", $nomUser, PDO::PARAM_STR);
+	    // extraction des données
+	    $req->execute();
+	    $uneLigne = $req->fetch(PDO::FETCH_OBJ);
+	    
+	    if ($uneLigne) {
+	        
+	        $unId = $uneLigne->id;
+	        $unLevel = $uneLigne->level;
+	        $unName = utf8_encode($uneLigne->name);
+	        $unPassword = utf8_encode($uneLigne->password);
+	        $unEmail = utf8_encode($uneLigne->email);
+	        
+	        $unUser = new Utilisateur($unId, $unLevel, $unName, $unPassword, $unEmail);
+	    }
+	    else
+	    {
+	        $unUser = null;
+	    }
+	    
+	    return $unUser; 
+      
+	}
+
+	
+	// aPasseDesReservations : recherche si l'utilisateur ($name) a passé des réservations à venir
+	// valeur de retour : un booléen "true" si l'utilisateur a passé des réservations à venir, "false" sinon
+	// créer par Mickaël Coubrun le 03/10/2017
+	public function aPasseDesReservations($nom)
+	{  // préparation de la requête
+	    $txt_req = "SELECT count(*) FROM mrbs_entry WHERE create_by = :nom";
+	    $req = $this->cnx->prepare($txt_req);
+	    // liaison de la requête et de ses paramètres
+	    $req->bindValue("nom", $nom, PDO::PARAM_STR);
+	    // exécution de la requête
+	    $req->execute();
+	    $nbReponses = $req->fetchColumn(0);
+	    // libère les ressources du jeu de données
+	    $req->closeCursor();
+	    //fourniture de la réponse
+	    if ($nbReponses == 0)
+	        return false;
+	    else
+	        return true;
+	}
+	
+
+	// cette fonction permet de savoir si une réservation existe ou non
+	// paramètre(s) : $existeReservation ==> l'identifiant de la réservation
+	// valeur de retour : un booléen "true" si la réservation existe, "false" sinon
+	// modifié par Pierre le 03/10/2017
+	public function existeReservation($idReservation)
+	{   // préparation de la requête
+	    $txt_req = "SELECT count(*) FROM mrbs_entry WHERE id = :idReservation";
+	    $req = $this->cnx->prepare($txt_req);
+	    // liaison de la requête et de ses paramètres
+	    $req->bindValue("idReservation", $idReservation, PDO::PARAM_STR);
+	    // exécution de la requête
+	    $req->execute();
+	    $nbReponses = $req->fetchColumn(0);
+	    // libère les ressources du jeu de données
+	    $req->closeCursor();
+	    
+	    //fourniture de la réponse
+	    if ($nbReponses == 0)
+	        return false;
+	    else
+	        return true;
+	
+	}
+	
+	/*
+	// cette fonction permet de modifier le Mot de passe d'un utilisateur
+	// paramètre(s) : $nom ==> le nom de l'utilisateur, $nouveauMdp ==> le nouveau mot de passe
+	// valeur de retour : un booléen "true" si la modification a bien eu lieu, "false" sinon
+	// modifié par Pierre le 03/10/2017
+	public function modifierMdpUser($nameUser, $newPass)
+	{   
+	        // préparation de la requête
+	        $txt_req = "UPDATE mrbs_users SET password = :newPass  WHERE name = :nameUser";
+	        $req = $this->cnx->prepare($txt_req);
+	        // liaison de la requête et de ses paramètres
+	        $req->bindValue("nameUser", $nameUser, PDO::PARAM_STR);
+	        $req->bindValue("newPass", md5($newPass), PDO::PARAM_STR);
+	        // exécution de la requête
+	        $req->execute();
+	        $nbReponses = $req->fetchColumn(0);
+	        // libère les ressources du jeu de données
+	        $req->closeCursor();
+	          	    
+	}
+	*/
+	
+	// donne si la réservation proposée est faite par l'utilisateur donné
+	// fait le 03/10/2017 par Mickaël
+	public function estLeCreateur($nomUser, $idReservation)
+	{  // préparation de la requête
+	    $txt_req = "SELECT count(*) from mrbs_entry WHERE create_by = :nomUser AND id = :idReservation";
+	    $req = $this->cnx->prepare($txt_req);
+	    // liaison de la requête et de ses paramêtres
+	    $req->bindValue("nomUser", $nomUser, PDO::PARAM_STR);
+	    $req->bindValue("idReservation", $idReservation, PDO::PARAM_STR);
+	    // exécution de la requête
+	    $req->execute();
+	    $nbReponses = $req->fetchColumn(0);
+	    // libère les ressources du jeu de données
+	    $req->closeCursor();
+	    // fourniture de la réponse
+	    if ($nbReponses == 0)
+	        return false;
+	        else
+	            return true;
+	}
+	
 	
 	//test si il existe une réservation provisoire
 	//fournit la valeur 0 si la réservation n'existe pas, 1 si la réservation existe

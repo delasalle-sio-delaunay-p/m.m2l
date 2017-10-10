@@ -528,12 +528,18 @@ class DAO
 	}
 	
 
-	//test si il existe une réservation provisoire
-	//fournit la valeur 0 si la réservation n'existe pas, 1 si la réservation existe
-	//modifié par Leilla le 03/10/2017
+	//test pour supprimer un utilisateur
+	//vérifie si l'utilisateur existe
+	//utilise la méthode d'instance existeUtilisateur
+	//modifié par Leilla le 10/10/2017
 	
 	public function supprimerUtilisateur($name)
-	{	// préparation de la requete
+	{	
+	    $dao = new DAO();
+	    $ok = $dao->existeUtilisateur($name);
+	    if ($ok == false) { return false; }
+	    
+	    // préparation de la requete
 	    $txt_req = "delete from mrbs_users where name = :name" ;
 	    $req = $this->cnx->prepare($txt_req);
 	    // liaison de la requête et de ses paramètres
@@ -541,6 +547,8 @@ class DAO
 	    // exécution de la requete
 	    $ok = $req->execute();
 	    return $ok;
+	    
+	    unset($dao);
 	}
 	// cette méthode permet de tester le digicode d'une salle/d'un bâtiment
 	// paramètre(s) : $digicodeSaisi ==> le digicode saisi par l'utilisateur

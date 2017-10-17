@@ -11,9 +11,14 @@ include_once ('Salle.class.php');
 <!DOCTYPE html>
 <html>
 <head>
-	<meta charset="utf-8">
-	<title>Test de la classe Salle</title>
-	<style type="text/css">body {font-family: Arial, Helvetica, sans-serif; font-size: small;}</style>
+<meta charset="utf-8">
+<title>Test de la classe Salle</title>
+<style type="text/css">
+body {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: small;
+}
+</style>
 </head>
 <body>
 

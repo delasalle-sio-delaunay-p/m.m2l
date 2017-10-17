@@ -146,7 +146,7 @@
 			<h3>Information</h3>
 		</div>
 		<div data-role="content">
-			<p style="text-align: center;"><img src="../images/information.png" class="image"/></p>
+			<p style="text-align: center;"><img src="images/information.png" class="image"/></p>
 			<p id="texte_message_information" style="text-align: center;">Message d'information</p>
 		</div>
 
@@ -157,7 +157,7 @@
 			<h3>Avertissement</h3>
 		</div>
 		<div data-role="content">
-			<p style="text-align: center;"><img src="../images/avertissement.png" class="image"/></p>
+			<p style="text-align: center;"><img src="images/avertissement.png" class="image"/></p>
 			<p id="texte_message_avertissement" style="text-align: center;">Message d'avertissement</p>
 		</div>
 		<div data-role="footer" class="ui-bar" data-theme="a">

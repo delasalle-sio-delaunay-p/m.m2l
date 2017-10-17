@@ -10,7 +10,7 @@ if ( $_SESSION['niveauUtilisateur'] != 'utilisateur' && $_SESSION['niveauUtilisa
     header ("Location: index.php?action=Deconnecter");
 }
 else {
-    if ( ! isset ($_POST ["txtNouveauMdp"]) && ! isset ($_POST ["txtConfirmationMdp"]) ) {
+    if ( ! isset ($_POST ["txtNouveauMdp"]) && ! isset ($_POST ["txtConfirmation"]) ) {
         // si les données n'ont pas été postées, c'est le premier appel du formulaire : affichage de la vue sans message d'erreur
         $nouveauMdp = '';
         $confirmationMdp = '';
@@ -23,7 +23,7 @@ else {
     else {
         // récupération des données postées
         if ( empty ($_POST ["txtNouveauMdp"]) == true)  $nouveauMdp = "";  else   $nouveauMdp = $_POST ["txtNouveauMdp"];
-        if ( empty ($_POST ["txtConfirmationMdp"]) == true)  $confirmationMdp = "";  else   $confirmationMdp = $_POST ["txtConfirmationMdp"];
+        if ( empty ($_POST ["txtConfirmation"]) == true)  $confirmationMdp = "";  else   $confirmationMdp = $_POST ["txtConfirmation"];
         if ( empty ($_POST ["caseAfficherMdp"]) == true)  $afficherMdp = 'off';  else   $afficherMdp = $_POST ["caseAfficherMdp"];
         
         if ( $nouveauMdp == "" || $confirmationMdp == "" ) {

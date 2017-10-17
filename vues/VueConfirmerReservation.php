@@ -1,9 +1,9 @@
 <?php
 	// Projet Réservations M2L - version web mobile
-	// fichier : vues/VueDemanderMdp.php
+	// fichier : vues/VueConfirmerReservation.php
 	// Rôle : visualiser la liste des réservations à venir d'un utilisateur
-	// cette vue est appelée par le contôleur controleurs/CtrlDemanderMdp.php
-	// Création : 10/10/2017 par Pierre
+	// cette vue est appelée par le contôleur controleurs/CtrlConfirmerReservation.php
+	// Création : 17/10/2017 par Pierre
     // Mise à jour : 17/10/2017 par Pierre
 ?>
 <!DOCTYPE html>
@@ -106,21 +106,21 @@
 	
 		<div data-role="header" data-theme="<?php echo $themeNormal; ?>">
 			<h4>M2L-GRR</h4>
-			<a href="index.php?action=Connecter" data-transition="<?php echo $transition; ?>">Reconnexion</a>
+			<a href="index.php?action=Menu" data-transition="<?php echo $transition; ?>">Retour menu</a>
 		</div>
 		
 		<div data-role="content">
-			<h4 style="text-align: center; margin-top:10px; margin-bottom:10px;">Demander un nouveau mot de passe</h4>
+			<h4 style="text-align: center; margin-top:10px; margin-bottom:10px;">Confirmer une réservation</h4>
 			<form id="formModificationMdp" action="#" method="post" data-ajax="false">
 				<div data-role="fieldcontain">
 					<input type="text"
-					 name="txtNom" id="txtNom" 
-					 placeholder="Entrez votre nom"
+					 name="numReservation" id="numReservation" 
+					 placeholder="Entrez le numéro de réservation"
 					 value="">
 				</div>
 
 				<div data-role="fieldcontain">
-					<input type="submit" name="btnDemandeMdp" id="btnDemandeMdp" value="M'envoyer un nouveau mot de passe">			
+					<input type="submit" name="btnDemandeMdp" id="btnDemandeMdp" value="Confirmer la réservation">			
 				</div>
 			</form>
 		</div>

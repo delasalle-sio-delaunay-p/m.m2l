@@ -610,7 +610,6 @@ class DAO
 	    // fourniture de la collection
 	    return $lesSalles;
 	    
-	    
 	}
 	
 	

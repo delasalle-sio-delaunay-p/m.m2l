@@ -149,6 +149,10 @@
 			<p style="text-align: center;"><img src="images/information.png" class="image"/></p>
 			<p id="texte_message_information" style="text-align: center;">Message d'information</p>
 		</div>
+		<div data-role="footer" class="ui-bar" data-theme="a">
+			<a href="#page_principale" data-transition="flip">Fermer</a>
+		</div>
+		
 
 	</div>
 	

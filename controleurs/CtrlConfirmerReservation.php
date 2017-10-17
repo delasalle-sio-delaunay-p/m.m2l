@@ -43,6 +43,8 @@ else {
             include_once ('modele/DAO.class.php');
             // classe Reservation
             include_once ('modele/Reservation.class.php');
+            // classe Outils
+            include_once ('modele/Outils.class.php');
             $dao = new DAO();
             
             $existeReservation = $dao->existeReservation($numReservation);
@@ -73,8 +75,68 @@ else {
                 else {
                     // l'utilisateur est l'auteur de cette déclaration
                     
+                    // quatrième vérification : on vérifie si la réservation n'est pas déjà confirmée
+                    // on récupère la réservation sous forme d'objet
+                
+                    $laReservation = $dao->getReservation($numReservation);
                     
+                    // on va check le status avec le getter
                     
+                    $status = $laReservation->getStatus();
+                    
+                    if ($status == 0){
+                        // la réservation est déjà confirmée
+                        $message = "La réservation est déjà confirmée !";
+                        $typeMessage = 'avertissement';
+                        $themeFooter = $themeProbleme;
+                        include_once ('vues/VueConfirmerReservation.php');
+                    }
+                    else {
+                        // la réservation n'est pas confirmée
+                        
+                        $endTime = $laReservation->getEnd_time();
+                        
+                        // différence entre date actuel (unix) et la date de la réserv (stockée en unix)
+                        // si la différence est positive alors la réservation n'est pas passée
+                        // si la différence est négative alors la réservation est déja passée
+                        $diff = ($endTime - time() );
+                        if ($diff < 0){
+                            // la réservation est déjà passée
+                            $message = "La réservation est déjà passée !";
+                            $typeMessage = 'avertissement';
+                            $themeFooter = $themeProbleme;
+                            include_once ('vues/VueConfirmerReservation.php');
+    
+                        }
+                        else {
+                            // tout est ok, on peut confirmer la réservation et envoyer le mail à l'utilisateur
+                            
+                            $confirm = $dao->confirmerReservation($numReservation);
+                            
+                            // on récupère l'email de l'utilisateur via le getter
+                            $user = $dao->getUtilisateur($nom);
+                            $mail = $user->getEmail();
+                            
+                            $sujet = "Confirmation réservation n° ".$numReservation;
+                            $adresseEmetteur = "delasalle.sio.eleves@gmail.com";
+                            $message = "La réservation n° ".$numReservation." a bien été confirmée ! "."Bonne journée ".$nom." ! ";
+                            $ok = Outils::envoyerMail($mail, $sujet, $message, $adresseEmetteur);
+                            
+                            if ( $ok ) {
+                                $message = "Enregistrement effectué.<br>Vous allez recevoir un mail de confirmation.";
+                                $typeMessage = 'information';
+                                $themeFooter = $themeNormal;
+                            }
+                            else {
+                                $message = "Enregistrement effectué.<br>L'envoi du mail de confirmation a rencontré un problème.";
+                                $typeMessage = 'avertissement';
+                                $themeFooter = $themeProbleme;
+                            }
+                            unset($dao);		// fermeture de la connexion à MySQL
+                            include_once ('vues/VueConfirmerReservation.php');
+                        }
+                    }
+            
                 }
                 
             }

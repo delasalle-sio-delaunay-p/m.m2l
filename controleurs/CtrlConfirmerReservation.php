@@ -16,9 +16,6 @@ else {
     
     if ( ! isset ($_POST ["numReservation"]) ) {
         // si les données n'ont pas été postées, c'est le premier appel du formulaire : affichage de la vue sans message d'erreur
-        $nouveauMdp = '';
-        $confirmationMdp = '';
-        $afficherMdp = 'off';
         $message = '';
         $typeMessage = '';			// 2 valeurs possibles : 'information' ou 'avertissement'
         $themeFooter = $themeNormal;
@@ -26,7 +23,7 @@ else {
     }
     else {
         // récupération des données postées
-        if ( empty ($_POST ["numReservation"]) == true)  $numReservation = "";  else   $numReservation = $_POST ["numReservation"];
+        if ( empty ($_POST["numReservation"]) == true)  $numReservation = "";  else   $numReservation = $_POST["numReservation"];
         
         // première vérification
         if ( $numReservation == "" ) {

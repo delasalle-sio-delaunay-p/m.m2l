@@ -111,20 +111,20 @@
 		</div>
 		
 		<div data-role="content">
-			<h4 style="text-align: center; margin-top:10px; margin-bottom:10px;">Changer mot de passe </h4>
+			<h4 style="text-align: center; margin-top:10px; margin-bottom:10px;">Modifier mon mot de passe</h4>
 			<form id="formModificationMdp" action="#" method="post" data-ajax="false">
 				<div data-role="fieldcontain">
 					<label for="txtNouveauMdp">Nouveau mot de passe :</label>
 					<input type="<?php if($afficherMdp == 'off') echo 'password'; else echo "text";?>"
 					 name="txtNouveauMdp" id="txtNouveauMdp" 
-					 placeholder="Mon nouveau mot de passe" required pattern="^.{8,}$"
+					 placeholder="Mon nouveau mot de passe"
 					 value="<?php echo $nouveauMdp; ?>">
 				</div>
 				<div data-role="fieldcontain">
-					<label for="txtConfirmation">Confirmation de mon nouveau mot de passe :</label>
+					<label for="txtConfirmation">Confirmation nouveau mot de passe :</label>
 					<input type="<?php if($afficherMdp == 'off') echo 'password'; else echo "text";?>" 
 					name="txtConfirmation" id="txtConfirmation" 
-					placeholder="Confirmation de mon nouveau mot de passe" required pattern="^.{8,}$" value="<?php echo $confirmationMdp; ?>">
+					placeholder="Confirmation de mon nouveau mot de passe" value="<?php echo $confirmationMdp; ?>">
 				</div>
 				<div data-role="fieldcontain" data-type="horizontal" class="ui-hide-label">
 					<label for="caseAfficherMdp">Afficher le mot de passe en clair</label>

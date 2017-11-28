@@ -47,10 +47,10 @@ else {
                 $dao = new DAO();
                 
                 // enregistre le nouveau mot de passe de l'utilisateur dans la bdd après l'avoir codé en MD5
-                $dao->modifierMdpUser ($nom, $nouveauMdp);
+                $dao->modifierMdpUser($nom, $nouveauMdp);
                 
                 // envoi d'un mail à l'utilisateur avec son nouveau mot de passe
-                $ok = $dao->envoyerMdp ($nom, $nouveauMdp);
+                $ok = $dao->envoyerMdp($nom, $nouveauMdp);
                 
                 if ( $ok ) {
                     $message = "Enregistrement effectué.<br>Vous allez recevoir un mail de confirmation.";

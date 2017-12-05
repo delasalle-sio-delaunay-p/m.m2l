@@ -1,9 +1,9 @@
 <?php
 // Service web du projet Réservations M2L
-// Ecrit le 31/3/2016 par Jim
-// Modifié le 3/6/2016 par Jim
+// Ecrit le 05/12/2017 par Pierre
+// Modifié le 05/12/2017 par Pierre
 
-// Ce service web permet à un utilisateur de consulter ses réservations à venir
+// Ce service web permet à un utilisateur de consulter les salles
 // et fournit un flux XML contenant un compte-rendu d'exécution
 
 // Le service web doit recevoir 2 paramètres : nom, mdp
@@ -13,10 +13,10 @@
 // Les paramètres peuvent être passés par la méthode POST (à privilégier en exploitation pour la confidentialité des données) :
 //     http://<hébergeur>/ConsulterReservations.php
 
-// inclusion de la classe Outils
+// inclusions
 include_once ('../modele/Outils.class.php');
-// inclusion des paramètres de l'application
 include_once ('../modele/parametres.localhost.php');
+include_once ('../modele/Salle.class.php');
 	
 // Récupération des données transmises
 // la fonction $_GET récupère une donnée passée en paramètre dans l'URL par la méthode GET
@@ -32,7 +32,7 @@ if ( $nom == "" && $mdp == "" )
 
 // initialisation du nombre de réservations
 $nbReponses = 0;
-$lesReservations = array();
+$lesSalles = array();
 
 // Contrôle de la présence des paramètres
 if ( $nom == "" || $mdp == "" )
@@ -50,19 +50,19 @@ else
 		$dao->creerLesDigicodesManquants();
 		
 		// récupération des réservations à venir créées par l'utilisateur
-		$lesReservations = $dao->getLesReservations($nom);
-		$nbReponses = sizeof($lesReservations);
+		$lesSalles = $dao->getLesSalles();
+		$nbReponses = sizeof($lesSalles);
 	
 		if ($nbReponses == 0)
-			$msg = "Erreur : vous n'avez aucune réservation.";
+			$msg = "Erreur : aucune salle disponible.";
 		else
-			$msg = "Vous avez effectué " . $nbReponses . " réservation(s).";
+			$msg = "Il y a " . $nbReponses . " salles(s) de disponible en réservation.";
 	}
 	// ferme la connexion à MySQL
 	unset($dao);
 }
 // création du flux XML en sortie
-creerFluxXML ($msg, $lesReservations);
+creerFluxXML ($msg, $lesSalles);
 
 // fin du programme (pour ne pas enchainer sur la fonction qui suit)
 exit;
@@ -70,7 +70,7 @@ exit;
 
 
 // création du flux XML en sortie
-function creerFluxXML($msg, $lesReservations)
+function creerFluxXML($msg, $lesSalles)
 {	// crée une instance de DOMdocument (DOM : Document Object Model)
 	$doc = new DOMDocument();
 	
@@ -97,34 +97,32 @@ function creerFluxXML($msg, $lesReservations)
 	$elt_data->appendChild($elt_donnees);
 	
 	// traitement des réservations
-	if (sizeof($lesReservations) > 0) {
-		foreach ($lesReservations as $uneReservation)
+	if (sizeof($lesSalles) > 0) {
+		foreach ($lesSalles as $uneSalle)
 		{
 			// crée un élément vide 'reservation'
-			$elt_reservation = $doc->createElement('reservation');
+			$elt_salle = $doc->createElement('salle');
 			// place l'élément 'reservation' dans l'élément 'donnees'
-			$elt_donnees->appendChild($elt_reservation);
+			$elt_donnees->appendChild($elt_salle);
 		
-			// crée les éléments enfants de l'élément 'reservation'
-			$elt_id         = $doc->createElement('id', $uneReservation->getId());
-			$elt_reservation->appendChild($elt_id);
-			$elt_timestamp  = $doc->createElement('timestamp', $uneReservation->getTimestamp());
-			$elt_reservation->appendChild($elt_timestamp);
-			$elt_start_time = $doc->createElement('start_time', date('Y-m-d H:i:s', $uneReservation->getStart_time()));
-			$elt_reservation->appendChild($elt_start_time);
-			$elt_end_time   = $doc->createElement('end_time', date('Y-m-d H:i:s', $uneReservation->getEnd_time()));
-			$elt_reservation->appendChild($elt_end_time);
-			$elt_room_name  = $doc->createElement('room_name', $uneReservation->getRoom_name());
-			$elt_reservation->appendChild($elt_room_name);
-			$elt_status     = $doc->createElement('status', $uneReservation->getStatus());
-			$elt_reservation->appendChild($elt_status);
+			// crée les éléments enfants de l'élément 'salle'
+			$elt_id  = $doc->createElement('id', $uneSalle->getId());
+			$elt_salle->appendChild($elt_id);
+			$elt_roomname  = $doc->createElement('room_name', $uneSalle->getRoom_name());
+			$elt_salle->appendChild($elt_roomname);
+			$elt_capacity = $doc->createElement('capacity', $uneSalle->getCapacity());
+			$elt_salle->appendChild($elt_capacity);
+			$elt_aeraname   = $doc->createElement('area_name', $uneSalle->getAreaName());
+			$elt_salle->appendChild($elt_aeraname);
 		
+			/*
 			// le digicode n'est renseigné que pour les réservations confirmées
 			if ( $uneReservation->getStatus() == "0")		// réservation confirmée
 				$elt_digicode = $doc->createElement('digicode', utf8_encode($uneReservation->getDigicode()));
 			else										// réservation provisoire
 				$elt_digicode = $doc->createElement('digicode', "");
 			$elt_reservation->appendChild($elt_digicode);
+			*/
 		}
 	}
 	

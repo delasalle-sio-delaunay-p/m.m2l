@@ -8,7 +8,7 @@
 
 // Le service web doit recevoir 2 paramètres : nom, mdp
 // Les paramètres peuvent être passés par la méthode GET (pratique pour les tests, mais à éviter en exploitation) :
-//     http://<hébergeur>/Connecter.php?nom=zenelsy&mdp=passe
+//     http://localhost/ws-php-delaunay/m.m2l/services/Connecter.php?nom=zenelsy&mdp=passe
 
 // Les paramètres peuvent être passés par la méthode POST (à privilégier en exploitation pour la confidentialité des données) :
 //     http://<hébergeur>/Connecter.php

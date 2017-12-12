@@ -33,7 +33,7 @@ if ( $nom == "" && $mdp == "" )
 }
 
 // Contrôle de la présence des paramètres
-if ( $nom == "" || $mdp == "")
+if ( $nom == "" || $mdp == "" || $id == "")
 {	$msg = "Erreur : données incomplètes.";
 }
 else
@@ -41,14 +41,17 @@ else
 	include_once ('../modele/DAO.class.php');
 	$dao = new DAO();
 	
+	// Contrôle de l'authentification avec les paramètres
 	if ( $dao->getNiveauUtilisateur($nom, $mdp) == "inconnu" )
 		$msg = "Erreur : authentification incorrecte.";
 	else 
 	{	
+	    // Contrôle du numéro de réservation
 	    if ($id == "") {
 	        $msg = "Erreur : numéro de réservation inexistant.";
 	    }
 	    else {
+	        // Contrôle de l'auteur de la réservation
 	        $ok = $dao->estLeCreateur($nom, $id);
 	        
 	        if ( $ok == false ) {
@@ -56,12 +59,54 @@ else
 	        }
 	        else {
 	            
+	            // Contrôle du statut de la réservation : on vérifie si elle est déjà confirmée
 	            $res = $dao->getReservation($id);
 
-	            if ($res->getStatus() == 4) {
+	            if ($res->getStatus() == 0) {
 	                $msg = "Erreur : cette réservation est déjà confirmée.";
 	            }
 	            else {
+	                
+	                // Contrôle du temps : on vérifie si la réservation est déjà passée
+	                
+	                $endTime = $res->getEnd_time();
+	                
+	                // différence entre date actuel (unix) et la date de la réserv (stockée en unix)
+	                // si la différence est positive alors la réservation n'est pas passée
+	                // si la différence est négative alors la réservation est déja passée
+	                
+	                $diff = ($endTime - time() );
+	                
+	                if ($diff < 0){
+	                    // la réservation est déjà passée
+	                    $msg = "Erreur : cette réservation est déjà passée.";
+	                    
+	                }
+	                else {
+	                    
+	                    // tout est ok, on peut confirmer la réservation et envoyer le mail à l'utilisateur
+	                    
+	                    $confirm = $dao->confirmerReservation($id);
+	                    
+	                    // on récupère l'email de l'utilisateur via le getter
+	                    $user = $dao->getUtilisateur($nom);
+	                    $mail = $user->getEmail();
+	                    
+	                    $sujet = "Confirmation réservation n° ".$id;
+	                    $adresseEmetteur = "delasalle.sio.eleves@gmail.com";
+	                    $message = "La réservation n° ".$id." a bien été confirmée ! "."Bonne journée ".$nom." ! ";
+	                    $ok = Outils::envoyerMail($mail, $sujet, $message, $adresseEmetteur);
+	                    
+	                    if ( $ok ) {
+	                        $msg = "Enregistrement effectué : vous allez recevoir un mail de confirmation.";
+	                    }
+	                    else {
+	                        $msg = "Enregistrement effectué, cependant l'envoi de mail a échoué.";
+	                    }
+	                    
+	                    
+	                    
+	                }
 	                
 	            }
 	        }
@@ -71,7 +116,7 @@ else
 	unset($dao);
 }
 // création du flux XML en sortie
-creerFluxXML ($msg, $lesReservations);
+creerFluxXML ($msg);
 
 // fin du programme (pour ne pas enchainer sur la fonction qui suit)
 exit;
@@ -79,69 +124,33 @@ exit;
 
 
 // création du flux XML en sortie
-function creerFluxXML($msg, $lesReservations)
+function creerFluxXML($msg)
 {	// crée une instance de DOMdocument (DOM : Document Object Model)
-	$doc = new DOMDocument();
-	
-	// specifie la version et le type d'encodage
-	$doc->version = '1.0';
-	//$doc->encoding = 'ISO-8859-1';
-	$doc->encoding = 'UTF-8';
-	
-	// crée un commentaire et l'encode en ISO
-	$elt_commentaire = $doc->createComment('Service web ConsulterReservations - BTS SIO - Lycée De La Salle - Rennes');
-	// place ce commentaire à la racine du document XML
-	$doc->appendChild($elt_commentaire);
-	
-	// crée l'élément 'data' à la racine du document XML
-	$elt_data = $doc->createElement('data');
-	$doc->appendChild($elt_data);
-	
-	// place l'élément 'reponse' dans l'élément 'data'
-	$elt_reponse = $doc->createElement('reponse', $msg);
-	$elt_data->appendChild($elt_reponse);
-	
-	// place l'élément 'donnees' dans l'élément 'data'
-	$elt_donnees = $doc->createElement('donnees');
-	$elt_data->appendChild($elt_donnees);
-	
-	// traitement des réservations
-	if (sizeof($lesReservations) > 0) {
-		foreach ($lesReservations as $uneReservation)
-		{
-			// crée un élément vide 'reservation'
-			$elt_reservation = $doc->createElement('reservation');
-			// place l'élément 'reservation' dans l'élément 'donnees'
-			$elt_donnees->appendChild($elt_reservation);
-		
-			// crée les éléments enfants de l'élément 'reservation'
-			$elt_id         = $doc->createElement('id', $uneReservation->getId());
-			$elt_reservation->appendChild($elt_id);
-			$elt_timestamp  = $doc->createElement('timestamp', $uneReservation->getTimestamp());
-			$elt_reservation->appendChild($elt_timestamp);
-			$elt_start_time = $doc->createElement('start_time', date('Y-m-d H:i:s', $uneReservation->getStart_time()));
-			$elt_reservation->appendChild($elt_start_time);
-			$elt_end_time   = $doc->createElement('end_time', date('Y-m-d H:i:s', $uneReservation->getEnd_time()));
-			$elt_reservation->appendChild($elt_end_time);
-			$elt_room_name  = $doc->createElement('room_name', $uneReservation->getRoom_name());
-			$elt_reservation->appendChild($elt_room_name);
-			$elt_status     = $doc->createElement('status', $uneReservation->getStatus());
-			$elt_reservation->appendChild($elt_status);
-		
-			// le digicode n'est renseigné que pour les réservations confirmées
-			if ( $uneReservation->getStatus() == "0")		// réservation confirmée
-				$elt_digicode = $doc->createElement('digicode', utf8_encode($uneReservation->getDigicode()));
-			else										// réservation provisoire
-				$elt_digicode = $doc->createElement('digicode', "");
-			$elt_reservation->appendChild($elt_digicode);
-		}
-	}
-	
-	// Mise en forme finale
-	$doc->formatOutput = true;
-	
-	// renvoie le contenu XML
-	echo $doc->saveXML();
-	return;
+    $doc = new DOMDocument();
+    
+    // specifie la version et le type d'encodage
+    $doc->version = '1.0';
+    //$doc->encoding = 'ISO-8859-1';
+    $doc->encoding = 'UTF-8';
+    
+    // crée un commentaire et l'encode en ISO
+    $elt_commentaire = $doc->createComment('Service web ConfirmerReservation - BTS SIO - Lycée De La Salle - Rennes');
+    // place ce commentaire à la racine du document XML
+    $doc->appendChild($elt_commentaire);
+    
+    // crée l'élément 'data' à la racine du document XML
+    $elt_data = $doc->createElement('data');
+    $doc->appendChild($elt_data);
+    
+    // place l'élément 'reponse' juste après l'élément 'data'
+    $elt_reponse = $doc->createElement('reponse', $msg);
+    $elt_data->appendChild($elt_reponse);
+    
+    // Mise en forme finale
+    $doc->formatOutput = true;
+    
+    // renvoie le contenu XML
+    echo $doc->saveXML();
+    return;
 }
 ?>

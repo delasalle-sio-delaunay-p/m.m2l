@@ -23,13 +23,14 @@ include_once ('../modele/parametres.localhost.php');
 if ( empty ($_GET ["nom"]) == true)  $nom = "";  else   $nom = $_GET ["nom"];
 if ( empty ($_GET ["mdp"]) == true)  $mdp = "";  else   $mdp = $_GET ["mdp"];
 if ( empty ($_GET ["id"]) == true)  $id = "";  else   $id = $_GET ["id"];
+if ( empty ($_GET ["numreservation"]) == true)  $id = "";  else   $id = $_GET ["numreservation"];
 
 // si l'URL ne contient pas les données, on regarde si elles ont été envoyées par la méthode POST
 // la fonction $_POST récupère une donnée envoyées par la méthode POST
 if ( $nom == "" && $mdp == "" )
 {	if ( empty ($_POST ["nom"]) == true)  $nom = "";  else   $nom = $_POST ["nom"];
 	if ( empty ($_POST ["mdp"]) == true)  $mdp = "";  else   $mdp = $_POST ["mdp"];
-	if ( empty ($_POST ["id"]) == true)  $id = "";  else   $id = $_POST ["id"];
+	if ( empty ($_POST ["numreservation"]) == true)  $id = "";  else   $id = $_POST ["numreservation"];
 }
 
 // Contrôle de la présence des paramètres
@@ -41,14 +42,17 @@ else
 	include_once ('../modele/DAO.class.php');
 	$dao = new DAO();
 	
+	// Contrôle de l'authentification avec les paramètres
 	if ( $dao->getNiveauUtilisateur($nom, $mdp) == "inconnu" )
 		$msg = "Erreur : authentification incorrecte.";
 	else 
 	{	
+	    // Contrôle du numéro de réservation
 	    if ($id == "") {
 	        $msg = "Erreur : numéro de réservation inexistant.";
 	    }
 	    else {
+	        // Contrôle de l'auteur de la réservation
 	        $ok = $dao->estLeCreateur($nom, $id);
 	        
 	        if ( $ok == false ) {
@@ -56,12 +60,54 @@ else
 	        }
 	        else {
 	            
+	            // Contrôle du statut de la réservation : on vérifie si elle est déjà confirmée
 	            $res = $dao->getReservation($id);
 
-	            if ($res->getStatus() == 4) {
+	            if ($res->getStatus() == 0) {
 	                $msg = "Erreur : cette réservation est déjà confirmée.";
 	            }
 	            else {
+	                
+	                // Contrôle du temps : on vérifie si la réservation est déjà passée
+	                
+	                $endTime = $res->getEnd_time();
+	                
+	                // différence entre date actuel (unix) et la date de la réserv (stockée en unix)
+	                // si la différence est positive alors la réservation n'est pas passée
+	                // si la différence est négative alors la réservation est déja passée
+	                
+	                $diff = ($endTime - time() );
+	                
+	                if ($diff < 0){
+	                    // la réservation est déjà passée
+	                    $msg = "Erreur : cette réservation est déjà passée.";
+	                    
+	                }
+	                else {
+	                    
+	                    // tout est ok, on peut confirmer la réservation et envoyer le mail à l'utilisateur
+	                    
+	                    $confirm = $dao->confirmerReservation($id);
+	                    
+	                    // on récupère l'email de l'utilisateur via le getter
+	                    $user = $dao->getUtilisateur($nom);
+	                    $mail = $user->getEmail();
+	                    
+	                    $sujet = "Confirmation réservation n° ".$id;
+	                    $adresseEmetteur = "delasalle.sio.eleves@gmail.com";
+	                    $message = "La réservation n° ".$id." a bien été confirmée ! "."Bonne journée ".$nom." ! ";
+	                    $ok = Outils::envoyerMail($mail, $sujet, $message, $adresseEmetteur);
+	                    
+	                    if ( $ok ) {
+	                        $msg = "Enregistrement effectué : vous allez recevoir un mail de confirmation.";
+	                    }
+	                    else {
+	                        $msg = "Enregistrement effectué, cependant l'envoi de mail a échoué.";
+	                    }
+	                    
+	                    
+	                    
+	                }
 	                
 	            }
 	        }
@@ -81,32 +127,32 @@ exit;
 // création du flux XML en sortie
 function creerFluxXML($msg)
 {	// crée une instance de DOMdocument (DOM : Document Object Model)
-	$doc = new DOMDocument();
-	
-	// specifie la version et le type d'encodage
-	$doc->version = '1.0';
-	//$doc->encoding = 'ISO-8859-1';
-	$doc->encoding = 'UTF-8';
-	
-	// crée un commentaire et l'encode en ISO
-	$elt_commentaire = $doc->createComment('Service web ConsulterReservations - BTS SIO - Lycée De La Salle - Rennes');
-	// place ce commentaire à la racine du document XML
-	$doc->appendChild($elt_commentaire);
-	
-	// crée l'élément 'data' à la racine du document XML
-	$elt_data = $doc->createElement('data');
-	$doc->appendChild($elt_data);
-	
-	// place l'élément 'reponse' dans l'élément 'data'
-	$elt_reponse = $doc->createElement('reponse', $msg);
-	$elt_data->appendChild($elt_reponse);
-	
 
-	// Mise en forme finale
-	$doc->formatOutput = true;
-	
-	// renvoie le contenu XML
-	echo $doc->saveXML();
-	return;
+    $doc = new DOMDocument();
+    
+    // specifie la version et le type d'encodage
+    $doc->version = '1.0';
+    //$doc->encoding = 'ISO-8859-1';
+    $doc->encoding = 'UTF-8';
+    
+    // crée un commentaire et l'encode en ISO
+    $elt_commentaire = $doc->createComment('Service web ConfirmerReservation - BTS SIO - Lycée De La Salle - Rennes');
+    // place ce commentaire à la racine du document XML
+    $doc->appendChild($elt_commentaire);
+    
+    // crée l'élément 'data' à la racine du document XML
+    $elt_data = $doc->createElement('data');
+    $doc->appendChild($elt_data);
+    
+    // place l'élément 'reponse' juste après l'élément 'data'
+    $elt_reponse = $doc->createElement('reponse', $msg);
+    $elt_data->appendChild($elt_reponse);
+    
+    // Mise en forme finale
+    $doc->formatOutput = true;
+    
+    // renvoie le contenu XML
+    echo $doc->saveXML();
+    return;
 }
 ?>

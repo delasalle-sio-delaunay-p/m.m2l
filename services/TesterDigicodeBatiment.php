@@ -8,10 +8,10 @@
 
 // Le service web doit recevoir 2 paramètres : numSalle, digicode
 // Les paramètres peuvent être passés par la méthode GET (pratique pour les tests, mais à éviter en exploitation) :
-//     http://<hébergeur>/TesterDigicodeSalle.php?numSalle=10&digicode=123456
+//     http://<hébergeur>/TesterDigicodeBatiment.php?numSalle=10&digicode=123456
 
 // Les paramètres peuvent être passés par la méthode POST (à privilégier en exploitation pour la confidentialité des données) :
-//     http://<hébergeur>/TesterDigicodeSalle.php
+//     http://<hébergeur>/TesterDigicodeBatiment.php
 
 // inclusion de la classe Outils
 include_once ('../modele/Outils.class.php');
@@ -20,18 +20,16 @@ include_once ('../modele/parametres.localhost.php');
 	
 // Récupération des données transmises
 // la fonction $_GET récupère une donnée passée en paramètre dans l'URL par la méthode GET
-if ( empty ($_GET ["numSalle"]) == true)  $numSalle = "";  else   $numSalle = $_GET ["numSalle"];
 if ( empty ($_GET ["digicode"]) == true)  $digicode = "";  else   $digicode = $_GET ["digicode"];
 
 // si l'URL ne contient pas les données, on regarde si elles ont été envoyées par la méthode POST
 // la fonction $_POST récupère une donnée envoyées par la méthode POST
-if ( $numSalle == "" && $digicode == "" )
-{	if ( empty ($_POST ["numSalle"]) == true)  $numSalle = "";  else   $numSalle = $_POST ["numSalle"];
-	if ( empty ($_POST ["digicode"]) == true)  $digicode = "";  else   $digicode = $_POST ["digicode"];
+if ( $digicode == "" )
+{	if ( empty ($_POST ["digicode"]) == true)  $digicode = "";  else   $digicode = $_POST ["digicode"];
 }
   
 // Contrôle de la présence des paramètres
-if ( $numSalle == "" || $digicode == "" )
+if ( $digicode == "" )
 {	$msg = "0";		// Erreur : données incomplètes
 }
 else
@@ -39,7 +37,7 @@ else
 	include_once ('../modele/DAO.class.php');
 	$dao = new DAO();
 	
-	$msg = $dao->testerDigicodeSalle($numSalle, $digicode);		// la fonction testerDigicodeSalle fournit "0" ou "1"
+	$msg = $dao->testerDigicodeBatiment($digicode);		// la fonction testerDigicodeSalle fournit "0" ou "1"
 	
 	// ferme la connexion à MySQL :
 	unset($dao);
@@ -62,7 +60,7 @@ function creerFluxXML($msg)
 	$doc->encoding = 'UTF-8';
 	
 	// crée un commentaire et l'encode en ISO
-	$elt_commentaire = $doc->createComment('Service web TesterDigicodeSalle - BTS SIO - Lycée De La Salle - Rennes');
+	$elt_commentaire = $doc->createComment('Service web TesterDigicodeBatiment - BTS SIO - Lycée De La Salle - Rennes');
 	// place ce commentaire à la racine du document XML
 	$doc->appendChild($elt_commentaire);
 	

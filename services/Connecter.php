@@ -63,7 +63,8 @@ function creerFluxXML($msg)
 	
 	// specifie la version et le type d'encodage
 	$doc->version = '1.0';
-	$doc->encoding = 'ISO-8859-1';
+	//$doc->encoding = 'ISO-8859-1';
+	$doc->encoding = 'UTF-8';
 	
 	// crée un commentaire et l'encode en ISO
 	$elt_commentaire = $doc->createComment('Service web Connecter - BTS SIO - Lycée De La Salle - Rennes');

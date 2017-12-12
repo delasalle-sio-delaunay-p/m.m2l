@@ -22,18 +22,18 @@ include_once ('../modele/parametres.localhost.php');
 // la fonction $_GET récupère une donnée passée en paramètre dans l'URL par la méthode GET
 if ( empty ($_GET ["nom"]) == true)  $nom = "";  else   $nom = $_GET ["nom"];
 if ( empty ($_GET ["mdp"]) == true)  $mdp = "";  else   $mdp = $_GET ["mdp"];
-if ( empty ($_GET ["mdp"]) == true)  $id = "";  else   $id = $_GET ["id"];
+if ( empty ($_GET ["numreservation"]) == true)  $id = "";  else   $id = $_GET ["numreservation"];
 
 // si l'URL ne contient pas les données, on regarde si elles ont été envoyées par la méthode POST
 // la fonction $_POST récupère une donnée envoyées par la méthode POST
 if ( $nom == "" && $mdp == "" )
 {	if ( empty ($_POST ["nom"]) == true)  $nom = "";  else   $nom = $_POST ["nom"];
 	if ( empty ($_POST ["mdp"]) == true)  $mdp = "";  else   $mdp = $_POST ["mdp"];
-	if ( empty ($_POST ["id"]) == true)  $id = "";  else   $id = $_POST ["id"];
+	if ( empty ($_POST ["numreservation"]) == true)  $id = "";  else   $id = $_POST ["numreservation"];
 }
 
 // Contrôle de la présence des paramètres
-if ( $nom == "" || $mdp == "" || $id == "")
+if ( $nom == "" || $mdp == "")
 {	$msg = "Erreur : données incomplètes.";
 }
 else

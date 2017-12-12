@@ -465,7 +465,9 @@ class DAO
 	        $req->execute();
 	        $nbReponses = $req->fetchColumn(0);
 	        // libère les ressources du jeu de données
-	        $req->closeCursor();
+	        $ok = $req->closeCursor();
+	        
+	        return $ok;
 	          	    
 	}
 	

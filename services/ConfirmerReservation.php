@@ -22,7 +22,7 @@ include_once ('../modele/parametres.localhost.php');
 // la fonction $_GET récupère une donnée passée en paramètre dans l'URL par la méthode GET
 if ( empty ($_GET ["nom"]) == true)  $nom = "";  else   $nom = $_GET ["nom"];
 if ( empty ($_GET ["mdp"]) == true)  $mdp = "";  else   $mdp = $_GET ["mdp"];
-if ( empty ($_GET ["mdp"]) == true)  $id = "";  else   $id = $_GET ["id"];
+if ( empty ($_GET ["id"]) == true)  $id = "";  else   $id = $_GET ["id"];
 
 // si l'URL ne contient pas les données, on regarde si elles ont été envoyées par la méthode POST
 // la fonction $_POST récupère une donnée envoyées par la méthode POST
@@ -71,7 +71,7 @@ else
 	unset($dao);
 }
 // création du flux XML en sortie
-creerFluxXML ($msg, $lesReservations);
+creerFluxXML ($msg);
 
 // fin du programme (pour ne pas enchainer sur la fonction qui suit)
 exit;
@@ -79,7 +79,7 @@ exit;
 
 
 // création du flux XML en sortie
-function creerFluxXML($msg, $lesReservations)
+function creerFluxXML($msg)
 {	// crée une instance de DOMdocument (DOM : Document Object Model)
 	$doc = new DOMDocument();
 	
@@ -101,42 +101,7 @@ function creerFluxXML($msg, $lesReservations)
 	$elt_reponse = $doc->createElement('reponse', $msg);
 	$elt_data->appendChild($elt_reponse);
 	
-	// place l'élément 'donnees' dans l'élément 'data'
-	$elt_donnees = $doc->createElement('donnees');
-	$elt_data->appendChild($elt_donnees);
-	
-	// traitement des réservations
-	if (sizeof($lesReservations) > 0) {
-		foreach ($lesReservations as $uneReservation)
-		{
-			// crée un élément vide 'reservation'
-			$elt_reservation = $doc->createElement('reservation');
-			// place l'élément 'reservation' dans l'élément 'donnees'
-			$elt_donnees->appendChild($elt_reservation);
-		
-			// crée les éléments enfants de l'élément 'reservation'
-			$elt_id         = $doc->createElement('id', $uneReservation->getId());
-			$elt_reservation->appendChild($elt_id);
-			$elt_timestamp  = $doc->createElement('timestamp', $uneReservation->getTimestamp());
-			$elt_reservation->appendChild($elt_timestamp);
-			$elt_start_time = $doc->createElement('start_time', date('Y-m-d H:i:s', $uneReservation->getStart_time()));
-			$elt_reservation->appendChild($elt_start_time);
-			$elt_end_time   = $doc->createElement('end_time', date('Y-m-d H:i:s', $uneReservation->getEnd_time()));
-			$elt_reservation->appendChild($elt_end_time);
-			$elt_room_name  = $doc->createElement('room_name', $uneReservation->getRoom_name());
-			$elt_reservation->appendChild($elt_room_name);
-			$elt_status     = $doc->createElement('status', $uneReservation->getStatus());
-			$elt_reservation->appendChild($elt_status);
-		
-			// le digicode n'est renseigné que pour les réservations confirmées
-			if ( $uneReservation->getStatus() == "0")		// réservation confirmée
-				$elt_digicode = $doc->createElement('digicode', utf8_encode($uneReservation->getDigicode()));
-			else										// réservation provisoire
-				$elt_digicode = $doc->createElement('digicode', "");
-			$elt_reservation->appendChild($elt_digicode);
-		}
-	}
-	
+
 	// Mise en forme finale
 	$doc->formatOutput = true;
 	

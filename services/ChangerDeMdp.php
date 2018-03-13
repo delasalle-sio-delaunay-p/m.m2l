@@ -1,36 +1,34 @@
 <?php
-// Service web du projet Réservations M2L
-// Ecrit le 05/12/2017 par Pierre
-// Modifié le 05/12/2017 par Pierre
+// Projet Réservations M2L
+// fichier : services/ChangerDeMdp.php
+// Dernière mise à jour : 13/03/2018 par Pierre
 
-// Ce service web permet à un utilisateur de changer son mot de passe
-// et fournit un flux XML contenant un compte-rendu d'exécution
+// Rôle : ce service web permet à un utilisateur de changer son mot de passe
+// Le service web doit recevoir 5 paramètres : nom, ancienMdp, nouveauMdp, confirmationMdp, lang
+//     nom : le nom (ou login) de connexion de l'utilisateur
+//     ancienMdp : le mot de passe de connexion de l'utilisateur
+//     nouveauMdp : 
+//     confirmationMdp : 
+//     lang : le langage du flux de données retourné ("xml" ou "json") ; "xml" par défaut si le paramètre est absent ou incorrect
+// Le service fournit un compte-rendu d'exécution
 
-// Le service web doit recevoir 2 paramètres : nom, mdp
 // Les paramètres peuvent être passés par la méthode GET (pratique pour les tests, mais à éviter en exploitation) :
-//     http://localhost/ws-php-delaunay/m.m2l/services/ChangerDeMdp.php?nom=zenelsy&ancienMdp=ab&nouveauMdp=123&confirmationMdp=1234
+//     http://<hébergeur>/CreerUtilisateur.php?nomAdmin=admin&mdpAdmin=admin&name=test&lang=json
 
+// Les paramètres peuvent être passés par la méthode POST (à privilégier en exploitation pour la confidentialité des données) :
+//     http://<hébergeur>/CreerUtilisateur.php
 
-// inclusion de la classe Outils
-include_once ('../modele/Outils.class.php');
-// inclusion des paramètres de l'application
-include_once ('../modele/parametres.localhost.php');
-	
 // Récupération des données transmises
 // la fonction $_GET récupère une donnée passée en paramètre dans l'URL par la méthode GET
-if ( empty ($_GET ["nom"]) == true)  $nom = "";  else   $nom = $_GET ["nom"];
-if ( empty ($_GET ["ancienMdp"]) == true)  $ancienMdp = "";  else   $ancienMdp = $_GET ["ancienMdp"];
-if ( empty ($_GET ["nouveauMdp"]) == true)  $nouveauMdp = "";  else   $nouveauMdp = $_GET ["nouveauMdp"];
-if ( empty ($_GET ["confirmationMdp"]) == true)  $confirmationMdp = "";  else   $confirmationMdp = $_GET ["confirmationMdp"];
-
-// si l'URL ne contient pas les données, on regarde si elles ont été envoyées par la méthode POST
 // la fonction $_POST récupère une donnée envoyées par la méthode POST
-if ( $nom == "")
-{	if ( empty ($_POST ["nom"]) == true)  $nom = "";  else   $nom = $_POST ["nom"];
-    if ( empty ($_POST ["ancienMdp"]) == true)  $ancienMdp = "";  else   $ancienMdp = $_POST ["ancienMdp"];
-    if ( empty ($_POST ["nouveauMdp"]) == true)  $nouveauMdp = "";  else   $nouveauMdp = $_POST ["nouveauMdp"];
-    if ( empty ($_POST ["confirmationMdp"]) == true)  $confirmationMdp = "";  else   $confirmationMdp = $_POST ["confirmationMdp"];
-}
+// la fonction $_REQUEST récupère par défaut le contenu des variables $_GET, $_POST, $_COOKIE
+if ( empty ($_REQUEST["nom"]) == true)  $nom = "";  else   $nom = $_REQUEST["nom"];
+if ( empty ($_REQUEST["ancienMdp"]) == true)  $ancienMdp = "";  else   $ancienMdp = $_REQUEST["ancienMdp"];
+if ( empty ($_REQUEST["nouveauMdp"]) == true)  $nouveauMdp = "";  else   $nouveauMdp = $_REQUEST["nouveauMdp"];
+if ( empty ($_REQUEST["confirmationMdp"]) == true) $confirmationMdp = "";  else   $confirmationMdp = $_REQUEST["confirmationMdp"];
+if ( empty ($_REQUEST["lang"]) == true) $lang = "";  else $lang = strtolower($_REQUEST["lang"]);
+// "xml" par défaut si le paramètre lang est absent ou incorrect
+if ($lang != "json") $lang = "xml";
 
 // Contrôle de la présence des paramètres
 if ( $nom == "" || $ancienMdp == "" || $nouveauMdp == "" || $confirmationMdp == "")
@@ -77,9 +75,12 @@ else
 	// ferme la connexion à MySQL
 	unset($dao);
 }
-// création du flux XML en sortie
-creerFluxXML ($msg);
-
+// création du flux en sortie
+if ($lang == "xml")
+    creerFluxXML ($msg);
+    else
+        creerFluxJSON ($msg);
+        
 // fin du programme (pour ne pas enchainer sur la fonction qui suit)
 exit;
  
@@ -96,7 +97,7 @@ function creerFluxXML($msg)
     $doc->encoding = 'UTF-8';
     
     // crée un commentaire et l'encode en ISO
-    $elt_commentaire = $doc->createComment('Service web ConfirmerReservation - BTS SIO - Lycée De La Salle - Rennes');
+    $elt_commentaire = $doc->createComment('Service web ChangerDeMdp - BTS SIO - Lycée De La Salle - Rennes');
     // place ce commentaire à la racine du document XML
     $doc->appendChild($elt_commentaire);
     
@@ -114,5 +115,24 @@ function creerFluxXML($msg)
     // renvoie le contenu XML
     echo $doc->saveXML();
     return;
+}
+
+function creerFluxJSON($msg)
+{
+    
+    // construction de l'élément "reservation"
+    //$elt_reservation = ["reservation" => $lesLignesDuTableau];
+    
+    // construction de l'élément "data"
+    //$elt_data = ["reponse" => $msg, "donnees" => $elt_reservation];
+    $elt_data = ["reponse" => $msg];
+    
+    // construction de la racine
+    $elt_racine = ["data" => $elt_data];
+    
+    // retourne le contenu JSON (l'option JSON_PRETTY_PRINT gère les sauts de ligne et l'indentation)
+    echo json_encode($elt_racine, JSON_PRETTY_PRINT);
+    return;
+    
 }
 ?>

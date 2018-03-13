@@ -1,6 +1,6 @@
 <?php
 // Projet Réservations M2L
-// fichier : services/CreerUtilisateur.php
+// fichier : services/SupprimerUtilisateur.php
 // Dernière mise à jour : 13/03/2018 par Pierre
 
 // Rôle : ce service web permet à un administrateur de supprimer un utilisateur
@@ -101,7 +101,7 @@ function creerFluxXML($msg)
     $doc->encoding = 'UTF-8';
     
     // crée un commentaire et l'encode en ISO
-    $elt_commentaire = $doc->createComment('Service web CreerUtilisateur - BTS SIO - Lycée De La Salle - Rennes');
+    $elt_commentaire = $doc->createComment('Service web SupprimerUtilisateur - BTS SIO - Lycée De La Salle - Rennes');
     // place ce commentaire à la racine du document XML
     $doc->appendChild($elt_commentaire);
     

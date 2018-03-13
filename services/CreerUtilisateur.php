@@ -1,40 +1,45 @@
 <?php
-// Service web du projet Réservations M2L
-// Ecrit le 21/5/2015 par Jim
-// Modifié le 2/6/2016 par Jim
+// Projet Réservations M2L
+// fichier : services/CreerUtilisateur.php
+// Dernière mise à jour : 21/2/2018 par Jim
 
-// Ce service web permet à un administrateur authentifié d'enregistrer un nouvel utilisateur
-// et fournit un compte-rendu d'exécution
+// Rôle : ce service web permet à un administrateur authentifié d'enregistrer un nouvel utilisateur
+// Le service web doit recevoir 6 paramètres : nomAdmin, mdpAdmin, name, level, email, lang
+//     nomAdmin : le nom (ou login) de connexion de l'administrateur
+//     mdpAdmin : le mot de passe de connexion de l'administrateur
+//     name : le nom de l'utilisateur à créer
+//     level : le niveau de l'utilisateur à créer (0, 1 ou 2)
+//     email : l'adresse mail de l'utilisateur à créer
+//     lang : le langage du flux de données retourné ("xml" ou "json") ; "xml" par défaut si le paramètre est absent ou incorrect
+// Le service fournit un compte-rendu d'exécution
 
-// Le service web doit être appelé avec 5 paramètres : nomAdmin, mdpAdmin, name, level, email
 // Les paramètres peuvent être passés par la méthode GET (pratique pour les tests, mais à éviter en exploitation) :
-//     http://<hébergeur>/CreerUtilisateur.php?nomAdmin=admin&mdpAdmin=admin&name=jim&level=1&email=jean.michel.cartron@gmail.com
+//     http://<hébergeur>/CreerUtilisateur.php?nomAdmin=admin&mdpAdmin=admin&name=jim&level=1&email=jean.michel.cartron@gmail.com&lang=xml
 
 // Les paramètres peuvent être passés par la méthode POST (à privilégier en exploitation pour la confidentialité des données) :
 //     http://<hébergeur>/CreerUtilisateur.php
+
+// Récupération des données transmises
+// la fonction $_GET récupère une donnée passée en paramètre dans l'URL par la méthode GET
+// la fonction $_POST récupère une donnée envoyées par la méthode POST
+// la fonction $_REQUEST récupère par défaut le contenu des variables $_GET, $_POST, $_COOKIE
+if ( empty ($_REQUEST["nomAdmin"]) == true)  $nomAdmin = "";  else   $nomAdmin = $_REQUEST["nomAdmin"];
+if ( empty ($_REQUEST["mdpAdmin"]) == true)  $mdpAdmin = "";  else   $mdpAdmin = $_REQUEST["mdpAdmin"];
+if ( empty ($_REQUEST["name"]) == true)  $name = "";  else   $name = $_REQUEST["name"];
+if ( empty ($_REQUEST["level"]) == true)  $level = "";  else   $level = $_REQUEST["level"];
+if ( empty ($_REQUEST["email"]) == true)  $email = "";  else   $email = $_REQUEST["email"];
+if ( empty ($_REQUEST["lang"]) == true) $lang = "";  else $lang = strtolower($_REQUEST["lang"]);
+// "xml" par défaut si le paramètre lang est absent ou incorrect
+if ($lang != "json") $lang = "xml";
 
 // inclusion de la classe Outils
 include_once ('../modele/Outils.class.php');
 // inclusion des paramètres de l'application
 include_once ('../modele/parametres.localhost.php');
 
-// Récupération des données transmises
-// la fonction $_GET récupère une donnée passée en paramètre dans l'URL par la méthode GET
-if ( empty ($_GET ["nomAdmin"]) == true)  $nomAdmin = "";  else   $nomAdmin = $_GET ["nomAdmin"];
-if ( empty ($_GET ["mdpAdmin"]) == true)  $mdpAdmin = "";  else   $mdpAdmin = $_GET ["mdpAdmin"];
-if ( empty ($_GET ["name"]) == true)  $name = "";  else   $name = $_GET ["name"];
-if ( empty ($_GET ["level"]) == true)  $level = "";  else   $level = $_GET ["level"];
-if ( empty ($_GET ["email"]) == true)  $email = "";  else   $email = $_GET ["email"];
-
-// si l'URL ne contient pas les données, on regarde si elles ont été envoyées par la méthode POST
-// la fonction $_POST récupère une donnée envoyées par la méthode POST
-if ( $nomAdmin == "" && $mdpAdmin == "" && $name == "" && $level == "" && $email == "" ) {
-	if ( empty ($_POST ["nomAdmin"]) == true)  $nomAdmin = "";  else   $nomAdmin = $_POST ["nomAdmin"];
-	if ( empty ($_POST ["mdpAdmin"]) == true)  $mdpAdmin = "";  else   $mdpAdmin = $_POST ["mdpAdmin"];
-	if ( empty ($_POST ["name"]) == true)  $name = "";  else   $name = $_POST ["name"];
-	if ( empty ($_POST ["level"]) == true)  $level = "";  else   $level = $_POST ["level"];
-	if ( empty ($_POST ["email"]) == true)  $email = "";  else   $email = $_POST ["email"];
-}
+// connexion du serveur web à la base MySQL
+include_once ('../modele/DAO.class.php');
+$dao = new DAO();
 
 // Contrôle de la présence des paramètres
 if ( $nomAdmin == "" || $mdpAdmin == "" || $name == "" || $level == "" || $email == "" || Outils::estUneAdrMailValide ($email) == false ) {
@@ -45,10 +50,6 @@ else {
 		$msg = "Erreur : le niveau doit être 0, 1 ou 2.";
 	}
 	else {
-		// connexion du serveur web à la base MySQL ("include_once" peut être remplacé par "require_once")
-		include_once ('../modele/DAO.class.php');
-		$dao = new DAO();
-	
 		if ( $dao->getNiveauUtilisateur($nomAdmin, $mdpAdmin) != "administrateur" ) {
 			$msg = "Erreur : authentification incorrecte.";
 		}
@@ -87,26 +88,39 @@ else {
 				}
 			}
 		}
-		// ferme la connexion à MySQL :
-		unset($dao);
 	}
 }
 
-// création du flux XML en sortie
-creerFluxXML ($msg);
+// ferme la connexion à MySQL
+unset($dao);
 
+// création du flux en sortie
+if ($lang == "xml")
+    creerFluxXML ($msg);
+else
+    creerFluxJSON ($msg);
+    
 // fin du programme (pour ne pas enchainer sur la fonction qui suit)
 exit;
 
 
 // création du flux XML en sortie
 function creerFluxXML($msg)
-{	// crée une instance de DOMdocument (DOM : Document Object Model)
+{	
+    /* Exemple de code XML
+        <?xml version="1.0" encoding="UTF-8"?>
+        <!--Service web CreerUtilisateur - BTS SIO - Lycée De La Salle - Rennes-->
+        <data>
+          <reponse>Erreur : données incomplètes ou incorrectes.</reponse>
+        </data>
+     */
+    
+    // crée une instance de DOMdocument (DOM : Document Object Model)
 	$doc = new DOMDocument();	
 
 	// specifie la version et le type d'encodage
 	$doc->version = '1.0';
-	$doc->encoding = 'ISO-8859-1';
+	$doc->encoding = 'UTF-8';
 	
 	// crée un commentaire et l'encode en ISO
 	$elt_commentaire = $doc->createComment('Service web CreerUtilisateur - BTS SIO - Lycée De La Salle - Rennes');
@@ -127,5 +141,27 @@ function creerFluxXML($msg)
 	// renvoie le contenu XML
 	echo $doc->saveXML();
 	return;
+}
+
+// création du flux JSON en sortie
+function creerFluxJSON($msg)
+{
+    /* Exemple de code JSON
+     {
+         "data":{
+            "reponse":"Erreur : donn\u00e9es incompl\u00e8tes ou incorrectes."
+         }
+     }
+     */
+    
+    // construction de l'élément "data"
+    $elt_data = ["reponse" => $msg];
+    
+    // construction de la racine
+    $elt_racine = ["data" => $elt_data];
+    
+    // retourne le contenu JSON (l'option JSON_PRETTY_PRINT gère les sauts de ligne et l'indentation)
+    echo json_encode($elt_racine, JSON_PRETTY_PRINT);
+    return;
 }
 ?>

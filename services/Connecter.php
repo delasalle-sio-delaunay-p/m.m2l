@@ -1,56 +1,61 @@
 <?php
-// Service web du projet Réservations M2L
-// Ecrit le 21/5/2015 par Jim
-// Modifié le 2/6/2016 par Jim
+// Projet Réservations M2L
+// fichier : services/Connecter.php
+// Dernière mise à jour : 21/2/2018 par Jim
 
-// Ce service web permet à un utilisateur de s'authentifier
-// et fournit un flux XML contenant un compte-rendu d'exécution
+// Rôle : ce service permet à un utilisateur de s'authentifier
+// Le service web doit recevoir 3 paramètres : nom, mdp, lang
+//     nom  : le nom (ou login) de connexion
+//     mdp  : le mot de passe de connexion
+//     lang : le langage du flux de données retourné ("xml" ou "json") ; "xml" par défaut si le paramètre est absent ou incorrect
+// Le service retourne un flux de données XML ou JSON contenant la liste des réservations
 
-// Le service web doit recevoir 2 paramètres : nom, mdp
 // Les paramètres peuvent être passés par la méthode GET (pratique pour les tests, mais à éviter en exploitation) :
-//     http://localhost/ws-php-delaunay/m.m2l/services/Connecter.php?nom=zenelsy&mdp=passe
+//     http://<hébergeur>/Connecter.php?nom=zenelsy&mdp=passe&lang=xml
 
 // Les paramètres peuvent être passés par la méthode POST (à privilégier en exploitation pour la confidentialité des données) :
 //     http://<hébergeur>/Connecter.php
+
+// Récupération des données transmises
+// la fonction $_GET récupère une donnée passée en paramètre dans l'URL par la méthode GET
+// la fonction $_POST récupère une donnée envoyées par la méthode POST
+// la fonction $_REQUEST récupère par défaut le contenu des variables $_GET, $_POST, $_COOKIE
+if ( empty ($_REQUEST["nom"]) == true)  $nom = "";  else   $nom = $_REQUEST["nom"];
+if ( empty ($_REQUEST["mdp"]) == true)  $mdp = "";  else   $mdp = $_REQUEST["mdp"];
+if ( empty ($_REQUEST["lang"]) == true) $lang = "";  else $lang = strtolower($_REQUEST["lang"]);
+// "xml" par défaut si le paramètre lang est absent ou incorrect
+if ($lang != "json") $lang = "xml";
 
 // inclusion de la classe Outils
 include_once ('../modele/Outils.class.php');
 // inclusion des paramètres de l'application
 include_once ('../modele/parametres.localhost.php');
-	
-// Récupération des données transmises
-// la fonction $_GET récupère une donnée passée en paramètre dans l'URL par la méthode GET
-if ( empty ($_GET ["nom"]) == true)  $nom = "";  else   $nom = $_GET ["nom"];
-if ( empty ($_GET ["mdp"]) == true)  $mdp = "";  else   $mdp = $_GET ["mdp"];
 
-// si l'URL ne contient pas les données, on regarde si elles ont été envoyées par la méthode POST
-// la fonction $_POST récupère une donnée envoyées par la méthode POST
-if ( $nom == "" && $mdp == "" )
-{	if ( empty ($_POST ["nom"]) == true)  $nom = "";  else   $nom = $_POST ["nom"];
-	if ( empty ($_POST ["mdp"]) == true)  $mdp = "";  else   $mdp = $_POST ["mdp"];
-}
+// connexion du serveur web à la base MySQL
+include_once ('../modele/DAO.class.php');
+$dao = new DAO();
 
 // Contrôle de la présence des paramètres
 if ( $nom == "" || $mdp == "" )
 {	$msg = "Erreur : données incomplètes.";
 }
 else
-{	// connexion du serveur web à la base MySQL
-	include_once ('../modele/DAO.class.php');
-	$dao = new DAO();
-	$niveauUtilisateur = $dao->getNiveauUtilisateur($nom, $mdp);
+{	$niveauUtilisateur = $dao->getNiveauUtilisateur($nom, $mdp);
 	
 	if ( $niveauUtilisateur == "inconnu" ) $msg = "Erreur : authentification incorrecte.";
 	
 	if ( $niveauUtilisateur == "utilisateur" ) $msg = "Utilisateur authentifié.";
 	if ( $niveauUtilisateur == "administrateur" ) $msg = "Administrateur authentifié.";
-	
-	// ferme la connexion à MySQL :
-	unset($dao);
 }
 
-// création du flux XML en sortie
-creerFluxXML ($msg);
+// ferme la connexion à MySQL
+unset($dao);
+
+// création du flux en sortie
+if ($lang == "xml")
+    creerFluxXML ($msg);
+else
+    creerFluxJSON ($msg);
 
 // fin du programme (pour ne pas enchainer sur la fonction qui suit)
 exit;
@@ -58,12 +63,20 @@ exit;
 
 // création du flux XML en sortie
 function creerFluxXML($msg)
-{	// crée une instance de DOMdocument (DOM : Document Object Model)
+{	
+    /* Exemple de code XML
+        <?xml version="1.0" encoding="UTF-8"?>
+        <!--Service web Connecter - BTS SIO - Lycée De La Salle - Rennes-->
+        <data>
+          <reponse>Utilisateur authentifié.</reponse>
+        </data>
+     */
+    
+    // crée une instance de DOMdocument (DOM : Document Object Model)
 	$doc = new DOMDocument();
 	
 	// specifie la version et le type d'encodage
 	$doc->version = '1.0';
-	//$doc->encoding = 'ISO-8859-1';
 	$doc->encoding = 'UTF-8';
 	
 	// crée un commentaire et l'encode en ISO
@@ -85,5 +98,27 @@ function creerFluxXML($msg)
 	// renvoie le contenu XML
 	echo $doc->saveXML();
 	return;
+}
+
+// création du flux JSON en sortie
+function creerFluxJSON($msg)
+{
+    /* Exemple de code JSON
+         {
+             "data":{
+                "reponse":"Utilisateur authentifi\u00e9."
+             }
+         }
+     */
+    
+    // construction de l'élément "data"
+    $elt_data = ["reponse" => $msg];
+    
+    // construction de la racine
+    $elt_racine = ["data" => $elt_data];
+    
+    // retourne le contenu JSON (l'option JSON_PRETTY_PRINT gère les sauts de ligne et l'indentation)
+    echo json_encode($elt_racine, JSON_PRETTY_PRINT);
+    return;
 }
 ?>

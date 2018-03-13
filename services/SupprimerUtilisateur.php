@@ -1,29 +1,33 @@
 <?php
-// Service web du projet Réservations M2L
+// Projet Réservations M2L
+// fichier : services/CreerUtilisateur.php
+// Dernière mise à jour : 13/03/2018 par Pierre
 
-// Ce service web permet à un administrateur authentifié de supprimer un nouvel utilisateur
-// et fournit un compte-rendu d'exécution
-// Le service web doit être appelé avec 5 paramètres : nomAdmin, mdpAdmin, name, level, email
+// Rôle : ce service web permet à un administrateur de supprimer un utilisateur
+// Le service web doit recevoir 4 paramètres : nomAdmin, mdpAdmin, name, lang
+//     nomAdmin : le nom (ou login) de connexion de l'administrateur
+//     mdpAdmin : le mot de passe de connexion de l'administrateur
+//     name : le nom de l'utilisateur à créer
+//     lang : le langage du flux de données retourné ("xml" ou "json") ; "xml" par défaut si le paramètre est absent ou incorrect
+// Le service fournit un compte-rendu d'exécution
+
 // Les paramètres peuvent être passés par la méthode GET (pratique pour les tests, mais à éviter en exploitation) :
-//     http://<hébergeur>/CreerUtilisateur.php?nomAdmin=admin&mdpAdmin=admin&name=jim&level=1&email=jean.michel.cartron@gmail.com
+//     http://<hébergeur>/CreerUtilisateur.php?nomAdmin=admin&mdpAdmin=admin&name=test&lang=json
+
 // Les paramètres peuvent être passés par la méthode POST (à privilégier en exploitation pour la confidentialité des données) :
 //     http://<hébergeur>/CreerUtilisateur.php
-// inclusion de la classe Outils
-include_once ('../modele/Outils.class.php');
-// inclusion des paramètres de l'application
-include_once ('../modele/parametres.localhost.php');
+
 // Récupération des données transmises
 // la fonction $_GET récupère une donnée passée en paramètre dans l'URL par la méthode GET
-if ( empty ($_GET ["nomAdmin"]) == true)  $nomAdmin = "";  else   $nomAdmin = $_GET ["nomAdmin"];
-if ( empty ($_GET ["mdpAdmin"]) == true)  $mdpAdmin = "";  else   $mdpAdmin = $_GET ["mdpAdmin"];
-if ( empty ($_GET ["name"]) == true)  $name = "";  else   $name = $_GET ["name"];
-// si l'URL ne contient pas les données, on regarde si elle s ont été envoyées par la méthode POST
 // la fonction $_POST récupère une donnée envoyées par la méthode POST
-if ( $nomAdmin == "" && $mdpAdmin == "" && $name == "" ) {
-    if ( empty ($_POST ["nomAdmin"]) == true)  $nomAdmin = "";  else   $nomAdmin = $_POST ["nomAdmin"];
-    if ( empty ($_POST ["mdpAdmin"]) == true)  $mdpAdmin = "";  else   $mdpAdmin = $_POST ["mdpAdmin"];
-    if ( empty ($_POST ["name"]) == true)  $name = "";  else   $name = $_POST ["name"];
-}
+// la fonction $_REQUEST récupère par défaut le contenu des variables $_GET, $_POST, $_COOKIE
+if ( empty ($_REQUEST["nomAdmin"]) == true)  $nomAdmin = "";  else   $nomAdmin = $_REQUEST["nomAdmin"];
+if ( empty ($_REQUEST["mdpAdmin"]) == true)  $mdpAdmin = "";  else   $mdpAdmin = $_REQUEST["mdpAdmin"];
+if ( empty ($_REQUEST["name"]) == true)  $name = "";  else   $name = $_REQUEST["name"];
+if ( empty ($_REQUEST["lang"]) == true) $lang = "";  else $lang = strtolower($_REQUEST["lang"]);
+// "xml" par défaut si le paramètre lang est absent ou incorrect
+if ($lang != "json") $lang = "xml";
+
 include_once ('../modele/DAO.class.php');
 $dao = new DAO();
 // Contrôle de la présence des paramètres
@@ -80,9 +84,13 @@ else {
         unset($dao);
     }
 }
-// création du flux XML en sortie
-creerFluxXML ($msg);
-// fin du programme (pour ne pas enchainer sur la fonction qui suit)
+
+// création du flux en sortie
+if ($lang == "xml")
+    creerFluxXML ($msg);
+    else
+        creerFluxJSON ($msg);
+        
 exit;
 // création du flux XML en sortie
 function creerFluxXML($msg)
@@ -111,5 +119,24 @@ function creerFluxXML($msg)
     // renvoie le contenu XML
     echo $doc->saveXML();
     return;
+}
+
+function creerFluxJSON($msg)
+{
+
+    // construction de l'élément "reservation"
+    //$elt_reservation = ["reservation" => $lesLignesDuTableau];
+    
+    // construction de l'élément "data"
+    //$elt_data = ["reponse" => $msg, "donnees" => $elt_reservation];
+    $elt_data = ["reponse" => $msg];
+    
+    // construction de la racine
+    $elt_racine = ["data" => $elt_data];
+    
+    // retourne le contenu JSON (l'option JSON_PRETTY_PRINT gère les sauts de ligne et l'indentation)
+    echo json_encode($elt_racine, JSON_PRETTY_PRINT);
+    return;
+    
 }
 ?>

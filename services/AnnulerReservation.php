@@ -44,7 +44,7 @@ else
 	else 
 	{	
 	    // Contrôle du numéro de réservation
-	    if ($id == "") {
+	    if ( !$dao->existeReservation($id) ) {
 	        $msg = "Erreur : numéro de réservation inexistant.";
 	    }
 	    else {

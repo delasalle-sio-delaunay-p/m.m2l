@@ -83,7 +83,8 @@ else {
 					}
 					else {
 						// tout a bien fonctionné
-						$msg = "Enregistrement effectué ; un mail va être envoyé à l'utilisateur.";
+						//$msg = "Enregistrement effectué ; un mail va être envoyé à l'utilisateur.";
+						$msg = "Enregistrement effectué.";
 					}
 				}
 			}
